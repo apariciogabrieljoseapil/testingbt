@@ -33,7 +33,7 @@ app.post('/api/signup', async (req, res) => {
     gender,
   } = req.body ?? {};
   console.log("Request body:", req.body);
-   let phoneint = parseInt(phone, 10);
+   
   if (!email || !password) {
     return res.status(400).json({ error: 'Email and password are required.' });
   }
@@ -52,7 +52,7 @@ app.post('/api/signup', async (req, res) => {
     options: {
       data: {
         full_name: fullName ?? null,
-        phone_number: phoneint ?? null,
+        phone_number: phone ?? null,
         date_birth: dateOfBirth ?? null,
         address: address ?? null,
         nationality: nationality ?? null,
