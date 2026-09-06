@@ -10,7 +10,8 @@ const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_ANON_KEY
 );
-
+console.log("SUPABASE_URL is:", JSON.stringify(process.env.SUPABASE_URL));
+console.log("SUPABASE_ANON_KEY is:", JSON.stringify(process.env.SUPABASE_ANON_KEY));
 app.use(express.json());
 app.use(cookieParser());
 app.get('/', (req, res) => {
