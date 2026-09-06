@@ -19,6 +19,7 @@ app.get('/', (req, res) => {
     status: 'ok'
   });
 });
+
 app.post('/api/signup', async (req, res) => {
   const {
     email,
@@ -30,7 +31,7 @@ app.post('/api/signup', async (req, res) => {
     nationality,
     gender,
   } = req.body ?? {};
-  println("Request body:", req.body);
+  console.log("Request body:", req.body);
 
   if (!email || !password) {
     return res.status(400).json({ error: 'Email and password are required.' });
