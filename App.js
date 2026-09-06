@@ -13,7 +13,12 @@ const supabase = createClient(
 
 app.use(express.json());
 app.use(cookieParser());
-
+app.get('/', (req, res) => {
+  res.json({
+    message: 'BuzzTap API is running',
+    status: 'ok'
+  });
+});
 app.post('/api/signup', async (req, res) => {
   const {
     email,
