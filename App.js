@@ -61,6 +61,7 @@ app.post('/api/signup', async (req, res) => {
   });
 
   if (error) {
+    console.log("Supabase signUp error:", JSON.stringify(error, null, 2));
     return res.status(error.status || 400).json({ error: error.message });
   }
 
