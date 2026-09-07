@@ -10,8 +10,8 @@ const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_ANON_KEY
 );
-console.log("SUPABASE_URL is:", JSON.stringify(process.env.SUPABASE_URL));
-console.log("SUPABASE_ANON_KEY is:", JSON.stringify(process.env.SUPABASE_ANON_KEY));
+// console.log("SUPABASE_URL is:", JSON.stringify(process.env.SUPABASE_URL));
+// console.log("SUPABASE_ANON_KEY is:", JSON.stringify(process.env.SUPABASE_ANON_KEY));
 app.use(express.json());
 app.use(cookieParser());
 app.get('/', (req, res) => {
@@ -83,15 +83,11 @@ app.post('/api/signup', async (req, res) => {
 
 app.post('/api/signin', async (req, res) => {
   const { email, password } = req.body ?? {};
-
   if (!email || !password) {
     return res.status(400).json({ error: 'Email and password are required.' });
   }
 
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password,});
 
   if (error) {
     // Supabase returns 400 for bad credentials — 401 is the more accurate
@@ -114,5 +110,31 @@ app.post('/api/signin', async (req, res) => {
       : null,
   });
 });
+app.get( '/api/acessuser/info', async (req, res) =>{
 
+
+});
+
+app.post('/api/auth/refresh', async (req, res) => {
+  const { refreshToken } = req.body;
+  if (!refreshToken) { 
+    return res.status(400).json({ success: false, message: 'Refresh token is required' }); }
+  const{data,error} = await supabase.auth.refreshSession({
+    refresh_token: refreshToken
+  });
+  if(error || !data.session){
+    return res.status(400).json({ success: false, message: 'Invalid token' }); 
+  }
+ const { session } = data;
+
+  return res.status(200).json({
+    session: session
+      ? {
+          accessToken: session.access_token,
+          refreshToken: session.refresh_token,
+          expiresAt: session.expires_at,
+        }
+      : null,
+  });
+});
 export default app;
