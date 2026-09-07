@@ -110,10 +110,6 @@ app.post('/api/signin', async (req, res) => {
       : null,
   });
 });
-app.get( '/api/acessuser/info', async (req, res) =>{
-
-
-});
 
 app.post('/api/auth/refresh', async (req, res) => {
   const { refreshToken } = req.body;
@@ -136,5 +132,38 @@ app.post('/api/auth/refresh', async (req, res) => {
         }
       : null,
   });
+});
+
+function getSupabaseForUser(accessToken) {
+  return createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY, {
+    global: {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    },
+  });
+}
+function authenticateToken(req, res, next) {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+  if (!token) return res.sendStatus(401);
+
+  jwt.verify(token, process.env.SUPABASE_JWT_SECRET, (err, decoded) => {
+    if (err) return res.sendStatus(401);
+    req.user = decoded;
+    req.token = token; // ← store the raw token too, so routes don't re-parse headers
+    next();
+  });
+}
+app.get('/api/user/data', authenticateToken, async (req, res) => {
+  const accessToken = req.headers['authorization'].split(' ')[1];
+  const supabaseUser = getSupabaseForUser(accessToken);
+
+  const { data, error } = await supabaseUser
+    .from('customer_account_information') // your table name
+    .select('*')
+    .single(); // if each user has exactly one row
+
+  if (error) return res.status(400).json({ success: false, message: error.message });
+
+  res.json({ success: true, data });
 });
 export default app;
