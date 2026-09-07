@@ -168,7 +168,9 @@ app.get('/api/user/data', authenticateToken, async (req, res) => {
     .select('*')
     .single();
 
-  if (error) return res.status(400).json({ success: false, message: error.message });
+  if (error) 
+    console.log(error.message);
+    return res.status(400).json({ success: false, message: error.message });
 
   res.json({ success: true, data });
 });
