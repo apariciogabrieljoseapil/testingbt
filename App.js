@@ -164,7 +164,7 @@ async function authenticateToken(req, res, next) {
 }
 app.get('/api/user/data', authenticateToken, async (req, res) => {
   const { data, error } = await req.supabase
-    .from('customer_account_information')
+    .from('costumer_account_information')
     .select('*')
     .single();
 
