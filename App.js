@@ -141,26 +141,32 @@ function getSupabaseForUser(accessToken) {
     },
   });
 }
-function authenticateToken(req, res, next) {
+async function authenticateToken(req, res, next) {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
-  if (!token) return res.sendStatus(401);
+  if (!token) {
+    console.log('No token in header');
+    return res.sendStatus(401);
+  }
 
-  jwt.verify(token, process.env.SUPABASE_JWT_SECRET, (err, decoded) => {
-    if (err) return res.sendStatus(401);
-    req.user = decoded;
-    req.token = token; // ← store the raw token too, so routes don't re-parse headers
-    next();
-  });
+  const supabaseUser = getSupabaseForUser(token);
+  const { data, error } = await supabaseUser.auth.getUser(token);
+
+  if (error || !data.user) {
+    console.log('getUser failed:', error?.message, error?.status);
+    return res.sendStatus(401);
+  }
+
+  req.user = data.user;
+  req.token = token;
+  req.supabase = supabaseUser;
+  next();
 }
 app.get('/api/user/data', authenticateToken, async (req, res) => {
-  const accessToken = req.headers['authorization'].split(' ')[1];
-  const supabaseUser = getSupabaseForUser(accessToken);
-
-  const { data, error } = await supabaseUser
-    .from('customer_account_information') // your table name
+  const { data, error } = await req.supabase
+    .from('customer_account_information')
     .select('*')
-    .single(); // if each user has exactly one row
+    .single();
 
   if (error) return res.status(400).json({ success: false, message: error.message });
 
