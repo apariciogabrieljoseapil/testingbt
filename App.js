@@ -2,7 +2,7 @@ import 'dotenv/config';
 import express from 'express';
 import { createClient } from '@supabase/supabase-js';
 import cookieParser from 'cookie-parser';
-
+import jwt from 'jsonwebtoken';
 const app = express();
 
 // Public client — used for the actual auth call (signUp, signIn, etc).
