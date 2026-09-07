@@ -173,35 +173,53 @@ app.get('/api/user/data', authenticateToken, async (req, res) => {
   res.json({ success: true, data });
 });
 
-app.get('/api/user/balance',authenticateToken,async (req,res) =>{
-  const {data,error} = await req.supabase
-  .from('costumer_account_balance')
-  .select('*')
-  .single();
-
-  if (error) return res.status(400).json({ success: false, message: error.message });
-  res.json({ success: true, data });
-});
-
-app.post('/api/user/updateuser',authenticateToken,async(req,res)=>{
-    const { fullname,
+app.post('/api/user/updateuser', authenticateToken, async (req, res) => {
+  try {
+    const {
+      fullname,
       phonenumber,
       datebirth,
       gender,
       address,
       nationality
-     } = req.body;
-   const {data,error} = await req.supabase
-  .from('costumer_account_information')
-  .update({full_name: fullname,
-          phone_number:phonenumber,
-          date_birth:datebirth,
-          gender: gender,
-          address: address,
-          nationality: nationality
-  });
-   if (error) return res.status(400).json({ success: false, message: error.message });
-   console.log(error.message);
-   res.json({ success: true, data });
+    } = req.body;
+
+    const userId = req.user.id;
+
+    const { data, error } = await req.supabase
+      .from('costumer_account_information')
+      .update({
+        full_name: fullname,
+        phone_number: phonenumber,
+        date_birth: datebirth,
+        gender: gender,
+        address: address,
+        nationality: nationality
+      })
+      .eq('costumer_id', userId)
+
+    if (error) {
+      console.error('Update user error:', error);
+
+      return res.status(400).json({
+        success: false,
+        message: error.message
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: 'User information updated successfully',
+      data
+    });
+
+  } catch (err) {
+    console.error('Server error:', err);
+
+    return res.status(500).json({
+      success: false,
+      message: 'Internal server error'
+    });
+  }
 });
 export default app;
