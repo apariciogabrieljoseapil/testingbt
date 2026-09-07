@@ -164,13 +164,11 @@ async function authenticateToken(req, res, next) {
 }
 app.get('/api/user/data', authenticateToken, async (req, res) => {
   const { data, error } = await req.supabase
-    .from('costumer_account_information')
+    .from('customer_account_information')
     .select('*')
     .single();
 
-  if (error) 
-    console.log(error.message);
-    return res.status(400).json({ success: false, message: error.message });
+  if (error) return res.status(400).json({ success: false, message: error.message });
 
   res.json({ success: true, data });
 });
