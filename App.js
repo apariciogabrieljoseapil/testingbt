@@ -173,6 +173,16 @@ app.get('/api/user/data', authenticateToken, async (req, res) => {
   res.json({ success: true, data });
 });
 
+app.get('/api/user/balance',authenticateToken,async (req,res) =>{
+  const {data,error} = await req.supabase
+  .from('costumer_account_balance')
+  .select('*')
+  .single();
+
+  if (error) return res.status(400).json({ success: false, message: error.message });
+  res.json({ success: true, data });
+});
+
 app.post('/api/user/updateuser', authenticateToken, async (req, res) => {
   try {
     const {
