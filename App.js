@@ -182,4 +182,27 @@ app.get('/api/user/balance',authenticateToken,async (req,res) =>{
   if (error) return res.status(400).json({ success: false, message: error.message });
   res.json({ success: true, data });
 });
+
+app.post('/api/user/updateuser',authenticateToken,async(req,res)=>{
+    const { fullname,
+      phonenumber,
+      datebirth,
+      gender,
+      address,
+      nationality
+     } = req.body;
+   const {data,error} = await req.supabase
+  .from('costumer_account_information')
+  .update({full_name: fullname,
+          phone_number:phonenumber,
+          date_birth:datebirth,
+          gender: gender,
+          address: address,
+          nationality: nationality
+  })
+  .eq('costumer_id', req.user);
+   if (error) return res.status(400).json({ success: false, message: error.message });
+   console.log(data);
+   res.json({ success: true, data });
+});
 export default app;
