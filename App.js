@@ -199,10 +199,9 @@ app.post('/api/user/updateuser',authenticateToken,async(req,res)=>{
           gender: gender,
           address: address,
           nationality: nationality
-  })
-  .eq('costumer_id', req.user);
+  });
    if (error) return res.status(400).json({ success: false, message: error.message });
-   console.log(data);
+   console.log(error.message);
    res.json({ success: true, data });
 });
 export default app;
