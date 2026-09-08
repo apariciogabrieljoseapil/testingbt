@@ -184,6 +184,10 @@ app.get('/api/user/balance',authenticateToken,async (req,res) =>{
 });
 
 app.post('/api/user/updateuser', authenticateToken, async (req, res) => {
+  const supabaseAdmin = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
   try {
     const {
       fullname,
@@ -217,7 +221,7 @@ app.post('/api/user/updateuser', authenticateToken, async (req, res) => {
       });
     }
     
-    const { error: authError } = await req.supabase.auth.updateUser(userId,{
+    const { error: authError } = await supabaseAdmin.auth.admin.updateUserById(userId,{
       user_metadata: { full_name: fullname },
     });
 
