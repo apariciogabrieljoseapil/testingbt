@@ -216,8 +216,9 @@ app.post('/api/user/updateuser', authenticateToken, async (req, res) => {
         message: error.message
       });
     }
-    const { error: authError } = await req.supabase.auth.updateUser({
-      data: { full_name: fullname },
+    
+    const { error: authError } = await req.supabase.auth.updateUser(userId,{
+      user_metadata: { full_name: fullname },
     });
 
     if (authError) {
