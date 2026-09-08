@@ -257,7 +257,7 @@ app.post('/api/user/profile/avatar', authenticateToken, upload.single('avatar'),
     const allowedTypes = ['image/jpeg', 'image/png'];
     if (!allowedTypes.includes(req.file.mimetype)) {
       const files= req.file.mimetype;
-      return res.status(400).json({ error: files });
+      return res.status(400).json({ error: 'Invalid file type ',files });
     }
 
     const ext = req.file.mimetype === 'image/png' ? 'png' : 'jpg';
