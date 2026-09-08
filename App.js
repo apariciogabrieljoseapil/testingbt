@@ -263,15 +263,25 @@ app.post('/api/user/profile/avatar', authenticateToken, upload.single('avatar'),
     const ext = req.file.mimetype === 'image/png' ? 'png' : 'jpeg';
     const filePath = `${req.user.id}/avatar.${ext}`;
 
-    // List existing avatar files for this user first
-    const { data: existingFiles } = await supabase.storage
-        .from('costumer_account_profile')
-        .list(req.user.id);
+        const { data: existingFiles, error: listError } = await supabase.storage
+  .from('costumer_account_profile')
+  .list(req.user.id);
 
-    if (existingFiles?.length) {
-        const pathsToRemove = existingFiles.map(f => `${req.user.id}/${f.name}`);
-        await supabase.storage.from('costumer_account_profile').remove(pathsToRemove);
-      }
+if (listError) {
+  console.error('List error:', listError);
+}
+
+if (existingFiles?.length) {
+  const pathsToRemove = existingFiles.map(f => `${req.user.id}/${f.name}`);
+  const { error: removeError } = await supabase.storage
+    .from('costumer_account_profile')
+    .remove(pathsToRemove);
+
+  if (removeError) {
+    console.error('Remove error:', removeError);
+    return res.status(500).json({ error: `Failed to remove old avatar: ${removeError.message}` });
+  }
+}
     const { error: uploadError } = await supabase.storage
       .from('costumer_account_profile')
       .upload(filePath, req.file.buffer, {
