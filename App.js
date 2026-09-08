@@ -179,7 +179,7 @@ app.get('/api/user/data', authenticateToken, async (req, res) => {
       .getPublicUrl(data.avatar_url);
     avatarUrl = `${urlData.publicUrl}?t=${Date.now()}`; // cache-bust
   }
-  if(data.a)
+  
   res.json({ success: true, data, avatar_url: avatarUrl });
 });
 
