@@ -279,7 +279,7 @@ app.post('/api/user/profile/avatar', authenticateToken, upload.single('avatar'),
     const { error: uploadError } = await supabase.storage
       .from('costumer_account_profile')
       .upload(filePath, pngBuffer, {
-        contentType: 'image/png',
+        contentType: 'png',
         upsert: true,
       });
 
