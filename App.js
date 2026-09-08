@@ -261,7 +261,8 @@ app.post('/api/user/profile/avatar', authenticateToken, upload.single('avatar'),
 
     const ext = req.file.mimetype === 'image/png' ? 'png' : 'jpg';
     const filePath = `${req.user.id}/avatar.${ext}`;
-
+    console.log('mimetype:', req.file.mimetype);
+    console.log('originalname:', req.file.originalname);
     const { error: uploadError } = await supabase.storage
       .from('costumer_account_profile')
       .upload(filePath, req.file.buffer, {
