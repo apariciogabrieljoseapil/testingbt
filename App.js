@@ -2,6 +2,7 @@ import 'dotenv/config';
 import express from 'express';
 import { createClient } from '@supabase/supabase-js';
 import cookieParser from 'cookie-parser';
+const multer = require('multer');
 import jwt from 'jsonwebtoken';
 const app = express();
 
