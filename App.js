@@ -2,7 +2,8 @@ import 'dotenv/config';
 import express from 'express';
 import { createClient } from '@supabase/supabase-js';
 import cookieParser from 'cookie-parser';
-const multer = require('multer');
+import sharp from 'sharp';
+import multer from 'multer';
 import jwt from 'jsonwebtoken';
 const app = express();
 
@@ -257,36 +258,28 @@ app.post('/api/user/profile/avatar', authenticateToken, upload.single('avatar'),
     const allowedTypes = ['image/jpeg', 'image/png'];
     if (!allowedTypes.includes(req.file.mimetype)) {
       const files= req.file.mimetype;
-      return res.status(400).json({ error: files });
+      
+      return res.status(400).json({ error: `Invalid file type: ${req.file.mimetype}` })
     }
 
-    const ext = req.file.mimetype === 'image/png' ? 'png' : 'jpeg';
-    const filePath = `${req.user.id}/avatar.${ext}`;
-
-    const{data : existingFiles, error: listError } = await supabase.storage
-    .from('costumer_account_profile')
-    .list(req.user.id);
-     
-    if(listError){
-      console.error('List error:', listError);
+     let pngBuffer;
+    try {
+      pngBuffer = await sharp(req.file.buffer)
+        .resize(512, 512, { fit: 'cover' }) // optional: normalize avatar dimensions too
+        .png()
+        .toBuffer();
+    } catch (conversionErr) {
+      console.error('Image conversion error:', conversionErr);
+      return res.status(400).json({ error: 'Could not process image — file may be corrupted or unsupported.' });
     }
-    if(existingFiles?.length){
-      const pathsToRemove = existingFiles.map(f => `${req.user.id}/${f.name}`);
-      const { data, error: removeError} = await supabase.storage
-      .from('costumer_account_information')
-      .remove(pathsToRemove);
 
-      if(removeError){
-        console.error('Error deleting files:', removeError);
-      } else{
-        console.log('Folder successfully removed:', data);
-      }
-    }
+    const filePath = `${req.user.id}/avatar.png`;
     
+
     const { error: uploadError } = await supabase.storage
       .from('costumer_account_profile')
-      .upload(filePath, req.file.buffer, {
-        contentType: req.file.mimetype,
+      .upload(filePath, pngBuffer, {
+        contentType: 'image/png',
         upsert: true,
       });
 
