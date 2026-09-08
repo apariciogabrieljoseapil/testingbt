@@ -263,25 +263,30 @@ app.post('/api/user/profile/avatar', authenticateToken, upload.single('avatar'),
     const ext = req.file.mimetype === 'image/png' ? 'png' : 'jpeg';
     const filePath = `${req.user.id}/avatar.${ext}`;
 
-        const { data: existingFiles, error: listError } = await supabase.storage
-  .from('costumer_account_profile')
-  .list(req.user.id);
-
-if (listError) {
-  console.error('List error:', listError);
-}
-
-if (existingFiles?.length) {
-  const pathsToRemove = existingFiles.map(f => `${req.user.id}/${f.name}`);
-  const { error: removeError } = await supabase.storage
+    const{data : existingFiles, error: listError } = await supabase.storage
     .from('costumer_account_profile')
-    .remove(pathsToRemove);
+    .list(req.user.id);
+     
+    if (listError) {
+      console.error('List error:', listError);
+      return;
+      }
+      if (!files || files.length === 0) {
+        console.log('Folder is already empty or does not exist.');
+        return;
+     }
+       const filesToRemove = files.map((file) => `${req.user.id}/${file.name}`);
+        const { data, error: removeError } = await supabase
+    .storage
+    .from('costumer_account_profile')
+    .remove(filesToRemove);
 
   if (removeError) {
-    console.error('Remove error:', removeError);
-    return res.status(500).json({ error: `Failed to remove old avatar: ${removeError.message}` });
+    console.error('Error deleting files:', removeError);
+  } else {
+    console.log('Folder successfully removed:', data);
   }
-}
+
     const { error: uploadError } = await supabase.storage
       .from('costumer_account_profile')
       .upload(filePath, req.file.buffer, {
