@@ -260,10 +260,18 @@ app.post('/api/user/profile/avatar', authenticateToken, upload.single('avatar'),
       return res.status(400).json({ error: files });
     }
 
-    const ext = req.file.mimetype === 'image/png' ? 'png' : 'jpg';
+    const ext = req.file.mimetype === 'image/png' ? 'png' : 'jpeg';
     const filePath = `${req.user.id}/avatar.${ext}`;
-    console.log('mimetype:', req.file.mimetype);
-    console.log('originalname:', req.file.originalname);
+
+    // List existing avatar files for this user first
+    const { data: existingFiles } = await supabase.storage
+        .from('costumer_account_profile')
+        .list(req.user.id);
+
+    if (existingFiles?.length) {
+        const pathsToRemove = existingFiles.map(f => `${req.user.id}/${f.name}`);
+        await supabase.storage.from('costumer_account_profile').remove(pathsToRemove);
+      }
     const { error: uploadError } = await supabase.storage
       .from('costumer_account_profile')
       .upload(filePath, req.file.buffer, {
