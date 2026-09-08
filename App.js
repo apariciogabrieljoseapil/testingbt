@@ -267,26 +267,22 @@ app.post('/api/user/profile/avatar', authenticateToken, upload.single('avatar'),
     .from('costumer_account_profile')
     .list(req.user.id);
      
-    if (listError) {
+    if(listError){
       console.error('List error:', listError);
-      return;
+    }
+    if(existingFiles?.length){
+      const pathsToRemove = existingFiles.map(f => `${req.user.id}/${f.name}`);
+      const { data, error: removeError} = await supabase.storage
+      .from('costumer_account_information')
+      .remove(pathsToRemove);
+
+      if(removeError){
+        console.error('Error deleting files:', removeError);
+      } else{
+        console.log('Folder successfully removed:', data);
       }
-      if (!files || files.length === 0) {
-        console.log('Folder is already empty or does not exist.');
-        return;
-     }
-       const filesToRemove = files.map((file) => `${req.user.id}/${file.name}`);
-        const { data, error: removeError } = await supabase
-    .storage
-    .from('costumer_account_profile')
-    .remove(filesToRemove);
-
-  if (removeError) {
-    console.error('Error deleting files:', removeError);
-  } else {
-    console.log('Folder successfully removed:', data);
-  }
-
+    }
+    
     const { error: uploadError } = await supabase.storage
       .from('costumer_account_profile')
       .upload(filePath, req.file.buffer, {
