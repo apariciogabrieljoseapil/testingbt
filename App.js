@@ -171,8 +171,16 @@ app.get('/api/user/data', authenticateToken, async (req, res) => {
     .single();
 
   if (error) return res.status(400).json({ success: false, message: error.message });
-
-  res.json({ success: true, data });
+  
+  let avatarUrl = null;
+  if(data.avatarUrl){
+     const { data: urlData } = req.supabase.storage
+      .from('costumer_account_profile')
+      .getPublicUrl(data.avatar_url);
+    avatarUrl = `${urlData.publicUrl}?t=${Date.now()}`; // cache-bust
+  }
+  if(data.a)
+  res.json({ success: true, data, avatar_url: avatarUrl });
 });
 
 app.get('/api/user/balance',authenticateToken,async (req,res) =>{
