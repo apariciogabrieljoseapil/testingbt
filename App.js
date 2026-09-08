@@ -257,8 +257,6 @@ app.post('/api/user/profile/avatar', authenticateToken, upload.single('avatar'),
 
     const allowedTypes = ['image/jpeg', 'image/png'];
     if (!allowedTypes.includes(req.file.mimetype)) {
-      const files= req.file.mimetype;
-      
       return res.status(400).json({ error: `Invalid file type: ${req.file.mimetype}` })
     }
 
@@ -276,20 +274,20 @@ app.post('/api/user/profile/avatar', authenticateToken, upload.single('avatar'),
     const filePath = `${req.user.id}/avatar.png`;
     
 
-    const { error: uploadError } = await supabase.storage
+    const { error: uploadError } = await req.supabase.storage
       .from('costumer_account_profile')
       .upload(filePath, pngBuffer, {
-        contentType: 'png',
+        contentType: 'image/png',
         upsert: true,
       });
 
     if (uploadError) return res.status(500).json({ error: uploadError.message });
 
-    const { data: urlData } = supabase.storage
+    const { data: urlData } = req.supabase.storage
       .from('costumer_account_profile')
       .getPublicUrl(filePath);
 
-    await supabase
+    await req.supabase
       .from('costumer_account_information')
       .update({ avatar_url: filePath })
       .eq('id', req.user.id);
