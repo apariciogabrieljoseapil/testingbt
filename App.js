@@ -183,11 +183,15 @@ app.get('/api/user/balance',authenticateToken,async (req,res) =>{
   res.json({ success: true, data });
 });
 
-app.post('/api/user/updateuser', authenticateToken, async (req, res) => {
+
   const supabaseAdmin = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
+
+
+app.post('/api/user/updateuser', authenticateToken, async (req, res) => {
+
   try {
     const {
       fullname,
@@ -242,6 +246,42 @@ app.post('/api/user/updateuser', authenticateToken, async (req, res) => {
       success: false,
       message: 'Internal server error'
     });
+  }
+});
+const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } }); // 10MB
+app.post('/api/user/profile/avatar', authenticateToken, upload.single('avatar'), async (req, res) => {
+  try {
+    if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+
+    const allowedTypes = ['image/jpeg', 'image/png'];
+    if (!allowedTypes.includes(req.file.mimetype)) {
+      return res.status(400).json({ error: 'Invalid file type' });
+    }
+
+    const ext = req.file.mimetype === 'image/png' ? 'png' : 'jpg';
+    const filePath = `${req.user.id}/avatar.${ext}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('costumer_account_profile')
+      .upload(filePath, req.file.buffer, {
+        contentType: req.file.mimetype,
+        upsert: true,
+      });
+
+    if (uploadError) return res.status(500).json({ error: uploadError.message });
+
+    const { data: urlData } = supabase.storage
+      .from('costumer_account_profile')
+      .getPublicUrl(filePath);
+
+    await supabase
+      .from('costumer_account_information')
+      .update({ avatar_url: filePath })
+      .eq('id', req.user.id);
+
+    res.json({ success: true, path: filePath, publicUrl: urlData.publicUrl });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 });
 export default app;
