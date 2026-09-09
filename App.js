@@ -178,7 +178,7 @@ app.get('/api/user/data', authenticateToken, async (req, res) => {
       .from('costumer_account_profile')
       .getPublicUrl(data.avatar_url);
 
-    avatarUrl = `${urlData.publicUrl}`; 
+    avatarUrl = `${urlData.publicUrl}?token=${req.token}`; 
   
   console.log(avatarUrl);
   res.json({ success: true, data, avatar_url: avatarUrl });
