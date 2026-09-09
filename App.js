@@ -279,9 +279,33 @@ app.post('/api/user/profile/avatar', authenticateToken, upload.single('avatar'),
       return res.status(400).json({ error: 'Could not process image — file may be corrupted or unsupported.' });
     }
 
-    const filePath = `${req.user.id}/avatar.png`;
+     const userFolder = `${req.user.id}`;
     
+    // 1. List existing files in the user's folder
+    const { data: existingFiles, error: listError } = await req.supabase.storage
+      .from('costumer_account_profile')
+      .list(userFolder);
+      if (listError) {
+      console.error('List error:', listError);
+      return res.status(500).json({ error: listError.message });
+    }
 
+    // 2. Delete all existing files in that folder (if any)
+    if (existingFiles && existingFiles.length > 0) {
+      const pathsToDelete = existingFiles.map(file => `${userFolder}/${file.name}`);
+      const { error: deleteError } = await req.supabase.storage
+        .from('costumer_account_profile')
+        .remove(pathsToDelete);
+
+      if (deleteError) {
+        console.error('Delete error:', deleteError);
+        return res.status(500).json({ error: deleteError.message });
+      }
+    }
+    // 3. Build a new datetime-based filename
+    const timestamp = Date.now(); // or new Date().toISOString().replace(/[:.]/g, '-')
+    const filePath = `${userFolder}/avatar-${timestamp}.png`;
+    
     const { error: uploadError } = await req.supabase.storage
       .from('costumer_account_profile')
       .upload(filePath, pngBuffer, {
