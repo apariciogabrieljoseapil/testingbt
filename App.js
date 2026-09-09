@@ -176,8 +176,8 @@ app.get('/api/user/data', authenticateToken, async (req, res) => {
 
      const { data: urlData } = req.supabase.storage
       .from('costumer_account_profile')
-      .getPublicUrl(data.avatar_url);
-      
+      .getPublicUrl('a81b2e40-856f-41bf-b8f6-32378cfde0c0/avatar-1788955324022.png');
+
     avatarUrl = `${urlData.publicUrl}`; 
   
   console.log(avatarUrl);
@@ -322,9 +322,10 @@ app.post('/api/user/profile/avatar', authenticateToken, upload.single('avatar'),
 
     await req.supabase
       .from('costumer_account_information')
-      .upsert({ avatar_url: filePath })
-      .eq('id', req.user.id);
-
+      .upsert(
+      { id: req.user.id, avatar_url: urlData.publicUrl },
+      { onConflict: 'id' }
+      );
     res.json({ success: true, path: filePath, publicUrl: urlData.publicUrl });
   } catch (err) {
     res.status(500).json({ error: err.message });
