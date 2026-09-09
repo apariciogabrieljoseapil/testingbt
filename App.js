@@ -168,19 +168,28 @@ app.get('/api/user/data', authenticateToken, async (req, res) => {
   const { data, error } = await req.supabase
     .from('costumer_account_information')
     .select('*')
+    .eq('id', req.user.id)
     .single();
 
   if (error) return res.status(400).json({ success: false, message: error.message });
-  
+
   let avatarUrl = null;
-  if(data.avatarUrl){
-     const { data: urlData } = req.supabase.storage
+  if (data.avatar_url) {
+    const { data: urlData } = req.supabase.storage
       .from('costumer_account_profile')
       .getPublicUrl(data.avatar_url);
-    avatarUrl = `${urlData.publicUrl}`; // cache-bust
+    avatarUrl = urlData.publicUrl;
   }
-  
-  res.json({ success: true, data, avatar_url: avatarUrl });
+
+  const { avatar_url: _rawPath, ...profileFields } = data;
+
+  res.json({
+    success: true,
+    data: {
+      ...profileFields,
+      avatar_url: avatarUrl,
+    },
+  });
 });
 
 app.get('/api/user/balance',authenticateToken,async (req,res) =>{
