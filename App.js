@@ -176,7 +176,7 @@ app.get('/api/user/data', authenticateToken, async (req, res) => {
 
      const { data: urlData } = req.supabase.storage
       .from('costumer_account_profile')
-      .getPublicUrl('https://giuobtmzjptxzjzkvbgc.supabase.co/storage/v1/object/sign/costumer_account_profile/a81b2e40-856f-41bf-b8f6-32378cfde0c0/avatar-1788955324022.png');
+      .getPublicUrl(data.avatar_url);
 
     avatarUrl = `${urlData.publicUrl}`; 
   
