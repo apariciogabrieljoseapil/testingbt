@@ -177,7 +177,7 @@ app.get('/api/user/data', authenticateToken, async (req, res) => {
      const { data: urlData } = req.supabase.storage
       .from('costumer_account_profile')
       .getPublicUrl(data.avatar_url);
-    avatarUrl = `${urlData.publicUrl}?t=${Date.now()}`; // cache-bust
+    avatarUrl = urlData.publicUrl; // cache-bust
   }
   
   res.json({ success: true, data, avatar_url: avatarUrl });
@@ -305,7 +305,7 @@ app.post('/api/user/profile/avatar', authenticateToken, upload.single('avatar'),
     // 3. Build a new datetime-based filename
     const timestamp = Date.now(); // or new Date().toISOString().replace(/[:.]/g, '-')
     const filePath = `${userFolder}/avatar-${timestamp}.png`;
-    
+
     const { error: uploadError } = await req.supabase.storage
       .from('costumer_account_profile')
       .upload(filePath, pngBuffer, {
@@ -321,7 +321,7 @@ app.post('/api/user/profile/avatar', authenticateToken, upload.single('avatar'),
 
     await req.supabase
       .from('costumer_account_information')
-      .update({ avatar_url: filePath })
+      .upsert({ avatar_url: filePath })
       .eq('id', req.user.id);
 
     res.json({ success: true, path: filePath, publicUrl: urlData.publicUrl });
