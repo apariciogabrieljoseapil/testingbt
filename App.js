@@ -177,7 +177,7 @@ app.get('/api/user/data', authenticateToken, async (req, res) => {
      const { data: urlData } = req.supabase.storage
       .from('costumer_account_profile')
       .getPublicUrl(data.avatar_url);
-    avatarUrl = urlData.publicUrl; // cache-bust
+    avatarUrl = `${urlData.publicUrl}`; // cache-bust
   }
   
   res.json({ success: true, data, avatar_url: avatarUrl });
