@@ -175,8 +175,10 @@ app.get('/api/user/data', authenticateToken, async (req, res) => {
     let avatarUrl = null;
     const bucketName = 'costumer_account_profile';
   
-    const result = path.split(`/${bucketName}/`)[1];
+    
   if (data.avatar_url) {
+    const path = new URL(data.avatar_url).pathname;
+    const result = path.split(`/${bucketName}/`)[1];
     const { data: signedData, error: signError } = await req.supabase.storage
       .from(bucketName)
       .createSignedUrl(result, 3600); // valid for 1 hour
