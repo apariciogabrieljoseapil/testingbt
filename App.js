@@ -187,12 +187,13 @@ app.get('/api/user/data', authenticateToken, async (req, res) => {
       console.error('Signed URL error:', signError);
     } else {
       avatarUrl = signedData.signedUrl;
+      data.avatar_url = avatarUrl;
     }
   }
   
   console.log(avatarUrl);
   console.log(result);
-  res.json({ success: true, data, avatar_url: avatarUrl });
+  res.json({ success: true, data});
 });
 
 app.get('/api/user/balance',authenticateToken,async (req,res) =>{
