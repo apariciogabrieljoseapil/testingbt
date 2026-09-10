@@ -174,10 +174,8 @@ app.get('/api/user/data', authenticateToken, async (req, res) => {
   
     let avatarUrl = null;
     const bucketName = 'costumer_account_profile';
-    let objectPath = data.avatar_url;
-    
-    const path = new URL(objectPath).pathname;
-    const result = path.split(`/${objectPath}/`)[1];
+  
+    const result = path.split(`/${bucketName}/`)[1];
   if (data.avatar_url) {
     const { data: signedData, error: signError } = await req.supabase.storage
       .from(bucketName)
