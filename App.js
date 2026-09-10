@@ -339,6 +339,7 @@ app.post('/api/user/profile/avatar', authenticateToken, upload.single('avatar'),
       { onConflict: 'costumer_id' }
       );
       if (upsertError) {
+        console.log(req.user.id);
   console.error('Avatar DB upsert error:', upsertError);
   console.log(urlData.publicUrl);
   return res.status(500).json({ error: 'Failed to save avatar URL' });
