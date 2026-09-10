@@ -335,8 +335,8 @@ app.post('/api/user/profile/avatar', authenticateToken, upload.single('avatar'),
     await req.supabase
       .from('costumer_account_information')
       .upsert(
-      { id: req.user.id, avatar_url: urlData.publicUrl },
-      { onConflict: 'id' }
+      { costumer_id: req.user.id, avatar_url: urlData.publicUrl },
+      { onConflict: 'costumer_id' }
       );
     res.json({ success: true, path: filePath, publicUrl: urlData.publicUrl });
   } catch (err) {
