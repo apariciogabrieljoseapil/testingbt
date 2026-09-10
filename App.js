@@ -40,14 +40,7 @@ app.post('/api/signup', async (req, res) => {
     return res.status(400).json({ error: 'Email and password are required.' });
   }
 
-  // Profile fields ride along in options.data as raw_user_meta_data.
-  // The on_auth_user_created_provision_customer trigger (see
-  // costumer_schema.sql) reads them from there and, in the SAME
-  // transaction as this signup, creates the costumer_account_info row
-  // and the costumer_balance row (starting at 0). If that trigger
-  // throws for any reason, this call returns an error below — no
-  // manual insert step needed here, and no risk of a user existing
-  // without a profile/balance.
+  
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
@@ -224,35 +217,19 @@ app.post('/api/user/updateuser', authenticateToken, async (req, res) => {
 
     const userId = req.user.id;
 
-    const { data, error } = await req.supabase
-      .from('costumer_account_information')
-      .update({
-        full_name: fullname,
-        phone_number: phonenumber,
-        date_birth: datebirth,
-        gender: gender,
-        address: address,
-        nationality: nationality
-      })
-      .eq('costumer_id', userId)
-
-    if (error) {
-      console.error('Update user error:', error);
-
-      return res.status(400).json({
-        success: false,
-        message: error.message
-      });
-    }
-    
-    const { error: authError } = await supabaseAdmin.auth.admin.updateUserById(userId,{
-      user_metadata: { full_name: fullname },
+    const {data,error} = await req.supabase.rpc('update_costumer_info',{
+      pfullname: fullname ?? null,
+      pphonenumber: phonenumber ?? null,
+      pdatebirth: datebirth ?? null,
+      pgender: gender ?? null,
+      paddress: address ?? null,
+      pnation: nationality ?? null,
     });
-
-    if (authError) {
-      console.error('Auth metadata update error:', authError);
-      // decide: fail the whole request, or just log and continue?
-    }
+    
+   if (error){
+    console.error('Update user error:',error);
+    return res.status(400).json({ success: false, message: error.message });
+   }
     return res.status(200).json({
       success: true,
       message: 'User information updated successfully',
