@@ -332,7 +332,7 @@ app.post('/api/user/profile/avatar', authenticateToken, upload.single('avatar'),
       .from('costumer_account_profile')
       .getPublicUrl(filePath);
 
-    await req.supabase
+    const {error: upsertError} = await req.supabase
       .from('costumer_account_information')
       .upsert(
       { costumer_id: req.user.id, avatar_url: urlData.publicUrl },
@@ -340,6 +340,7 @@ app.post('/api/user/profile/avatar', authenticateToken, upload.single('avatar'),
       );
       if (upsertError) {
   console.error('Avatar DB upsert error:', upsertError);
+  console.log(urlData.publicUrl);
   return res.status(500).json({ error: 'Failed to save avatar URL' });
 }
     res.json({ success: true, path: filePath, publicUrl: urlData.publicUrl });
