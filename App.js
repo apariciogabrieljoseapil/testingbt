@@ -177,7 +177,7 @@ app.get('/api/user/data', authenticateToken, async (req, res) => {
     let objectPath = data.avatar_url;
     
     const path = new URL(objectPath).pathname;
-    const result = path.split("/costumer_account_profile/")[1];
+    const result = path.split(`/${objectPath}/`)[1];
   if (data.avatar_url) {
     const { data: signedData, error: signError } = await req.supabase.storage
       .from(bucketName)
@@ -185,13 +185,14 @@ app.get('/api/user/data', authenticateToken, async (req, res) => {
 
     if (signError) {
       console.error('Signed URL error:', signError);
+       data.avatar_url = null;
     } else {
       avatarUrl = signedData.signedUrl;
       data.avatar_url = avatarUrl;
     }
   }
   
-  console.log(avatarUrl);
+  // console.log(avatarUrl);
   console.log(result);
   res.json({ success: true, data});
 });
