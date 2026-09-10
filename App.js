@@ -191,6 +191,7 @@ app.get('/api/user/data', authenticateToken, async (req, res) => {
   }
   
   console.log(avatarUrl);
+  console.log(objectPath);
   res.json({ success: true, data, avatar_url: avatarUrl });
 });
 
