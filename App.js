@@ -173,13 +173,14 @@ app.get('/api/user/data', authenticateToken, async (req, res) => {
   if (error) return res.status(400).json({ success: false, message: error.message });
   
     let avatarUrl = null;
+    const bucketName = 'costumer_account_profile';
     let objectPath = data.avatar_url;
     if (objectPath.includes(`/object/public/${bucketName}/`)) {
       objectPath = objectPath.split(`/object/public/${bucketName}/`)[1];
     }
   if (data.avatar_url) {
     const { data: signedData, error: signError } = await req.supabase.storage
-      .from('costumer_account_profile')
+      .from(bucketName)
       .createSignedUrl(objectPath, 3600); // valid for 1 hour
 
     if (signError) {
