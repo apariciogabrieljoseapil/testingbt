@@ -16,11 +16,40 @@ const supabase = createClient(
 // console.log("SUPABASE_ANON_KEY is:", JSON.stringify(process.env.SUPABASE_ANON_KEY));
 app.use(express.json());
 app.use(cookieParser());
-app.get('/', (req, res) => {
-  res.json({
-    message: 'BuzzTap API is running',
-    status: 'ok'
-  });
+app.get('/', async (req, res) => {
+  const userId = 'a81b2e40-856f-41bf-b8f6-32378cfde0c0';
+
+  // 1. Clean up storage first
+  const { data: files, error: listError } = await supabaseAdmin.storage
+    .from('costumer_account_profile')
+    .list(userId);
+
+  if (listError) {
+    console.error('List error:', listError);
+    return res.status(500).json({ error: listError.message });
+  }
+
+  if (files && files.length > 0) {
+    const paths = files.map(f => `${userId}/${f.name}`);
+    const { error: removeError } = await supabaseAdmin.storage
+      .from('costumer_account_profile')
+      .remove(paths);
+
+    if (removeError) {
+      console.error('Storage cleanup error:', removeError);
+      return res.status(500).json({ error: removeError.message });
+    }
+  }
+
+  // 2. Then delete the auth user (cascades to costumer_account_information via your FK)
+  const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(userId);
+
+  if (deleteError) {
+    console.error('Delete user error:', deleteError);
+    return res.status(500).json({ error: deleteError.message });
+  }
+
+  res.json({ success: true, message: 'Account deleted' });
 });
 
 app.post('/api/signup', async (req, res) => {
@@ -332,16 +361,13 @@ app.post('/api/user/profile/avatar', authenticateToken, upload.single('avatar'),
       .from('costumer_account_profile')
       .getPublicUrl(filePath);
 
-    const {error: upsertError} = await req.supabase
-      .from('costumer_account_information')
-      .upsert(
-      { costumer_id: req.user.id, avatar_url: urlData.publicUrl },
-      { onConflict: 'costumer_id' }
-      );
-      if (upsertError) {
-        console.log(req.user.id);
-  console.error('Avatar DB upsert error:', upsertError);
-  console.log(urlData.publicUrl);
+   const { error: updateError } = await req.supabase
+  .from('costumer_account_information')
+  .update({ avatar_url: urlData.publicUrl })
+  .eq('costumer_id', req.user.id);
+
+if (updateError) {
+  console.error('Avatar DB update error:', updateError);
   return res.status(500).json({ error: 'Failed to save avatar URL' });
 }
     res.json({ success: true, path: filePath, publicUrl: urlData.publicUrl });
