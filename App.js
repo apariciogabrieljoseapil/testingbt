@@ -171,30 +171,26 @@ app.get('/api/user/data', authenticateToken, async (req, res) => {
     .single();
 
   if (error) return res.status(400).json({ success: false, message: error.message });
-  
-    let avatarUrl = null;
-    const bucketName = 'costumer_account_profile';
-  
-    
+
+  const bucketName = 'costumer_account_profile';
+
   if (data.avatar_url) {
     const path = new URL(data.avatar_url).pathname;
     const result = path.split(`/${bucketName}/`)[1];
+
     const { data: signedData, error: signError } = await req.supabase.storage
       .from(bucketName)
       .createSignedUrl(result, 3600); // valid for 1 hour
 
     if (signError) {
       console.error('Signed URL error:', signError);
-       data.avatar_url = null;
+      data.avatar_url = null;
     } else {
-      avatarUrl = signedData.signedUrl;
-      data.avatar_url = avatarUrl;
+      data.avatar_url = signedData.signedUrl;
     }
   }
-  
-  // console.log(avatarUrl);
-  console.log(result);
-  res.json({ success: true, data});
+
+  res.json({ success: true, data });
 });
 
 app.get('/api/user/balance',authenticateToken,async (req,res) =>{
