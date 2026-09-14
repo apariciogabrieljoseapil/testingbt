@@ -11,7 +11,7 @@ export function renderProfileHtml(user) {
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: #f4f5f7;
+      background: linear-gradient(135deg, #ffffff 0%, #f8e9c2 40%, #d4af37 75%, #a8842c 100%);
       margin: 0;
       padding: 0;
       display: flex;
@@ -19,14 +19,16 @@ export function renderProfileHtml(user) {
       align-items: center;
       min-height: 100vh;
     }
-    .card {
-      background: #fff;
-      border-radius: 16px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-      padding: 32px;
-      width: 320px;
+      .card {
+      width: 190px;
+      height: 254px;
+      border-radius: 30px;
+      background: #e0e0e0;
+      box-shadow: 15px 15px 30px  rgba(0,0,0,0.08),
+      -15px -15px 30px #ffffff;
       text-align: center;
     }
+    
     .avatar {
       width: 100px;
       height: 100px;
