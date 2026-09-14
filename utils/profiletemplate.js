@@ -1,4 +1,4 @@
-import { escapeHtml, formatDate } from './html.js';
+import { escapeHtml, formatDate } from './htmls.js';
 
 export function renderProfileHtml(user) {
   return `
