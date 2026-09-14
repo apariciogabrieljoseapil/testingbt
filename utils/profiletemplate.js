@@ -9,7 +9,7 @@ export function renderProfileHtml(user) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${escapeHtml(user.full_name ?? 'Profile')}</title>
   <style>
-    body {
+   body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       background: linear-gradient(135deg, #ffffff 0%, #f8e9c2 40%, #d4af37 75%, #a8842c 100%);
       margin: 0;
@@ -20,15 +20,15 @@ export function renderProfileHtml(user) {
       min-height: 100vh;
     }
       .card {
-      width: 190px;
-      height: 254px;
+      width: 320px;
       border-radius: 30px;
-      background: #e0e0e0;
+      padding: 32px;
+      background: #fff;
       box-shadow: 15px 15px 30px  rgba(0,0,0,0.08),
       -15px -15px 30px #ffffff;
       text-align: center;
     }
-    
+   
     .avatar {
       width: 100px;
       height: 100px;
