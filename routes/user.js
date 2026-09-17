@@ -49,6 +49,18 @@ router.get('/balance', authenticateToken, async (req, res) => {
   console.log(`Finished time user balance: ${Date.now()-starttime}`);
 });
 
+router.get('/transaction', authenticateToken, async (req, res) => {
+  const starttime = Date.now();
+  const { data, error } = await req.supabase
+    .from('costumer_transaction_history')
+    .select('*')
+    .single();
+
+  if (error) return res.status(400).json({ success: false, message: error.message });
+  res.json({ success: true, data });
+  console.log(`Finished time user transaction: ${Date.now()-starttime}`);
+});
+
 router.post('/updateuser', authenticateToken, async (req, res) => {
   const starttime = Date.now();
   try {
