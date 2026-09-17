@@ -1,4 +1,7 @@
 import { getSupabaseForUser } from '../config/supabaseclient.js';
+import {jwtVerify, createRemoteJWKSet} from 'jose';
+
+const JWKS = createRemoteJWKSet(new URL(process.env.SUPABASE_JWT_SECRET));
 
 export async function authenticateToken(req, res, next) {
   const authHeader = req.headers['authorization'];
@@ -7,17 +10,19 @@ export async function authenticateToken(req, res, next) {
     console.log('No token in header');
     return res.sendStatus(401);
   }
+  try{
+      const{payload} = await jwtVerify(token,JWKS,{
+        issuer: `${process.env.SUPABASE_URL}/auth/v1`,
+        audience: 'authenticated',
+      });
 
-  const supabaseUser = getSupabaseForUser(token);
-  const { data, error } = await supabaseUser.auth.getUser(token);
-
-  if (error || !data.user) {
-    console.log('getUser failed:', error?.message, error?.status);
+  req.user = { id: payload.sub, email: payload.email, ...payload };;
+  req.token = token;
+  req.supabase = getSupabaseForUser(token);
+  next();
+  }catch(err){
+    console.log('JWT verify failed:', err.message);
     return res.sendStatus(401);
   }
-
-  req.user = data.user;
-  req.token = token;
-  req.supabase = supabaseUser;
-  next();
+  
 }

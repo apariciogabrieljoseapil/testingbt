@@ -31,6 +31,7 @@ router.post('/signup', async (req, res) => {
         address: address ?? null,
         nationality: nationality ?? null,
         gender: gender ?? null,
+        role: 'CUSTOMER',
       },
     },
   });
