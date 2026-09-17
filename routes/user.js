@@ -5,7 +5,7 @@ import { authenticateToken } from '../middleware/Authenticate.js';
 
 const router = Router();
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } }); // 10MB
-
+const starttime = Date.now();
 router.get('/data', authenticateToken, async (req, res) => {
   const { data, error } = await req.supabase
     .from('costumer_account_information')
@@ -33,6 +33,7 @@ router.get('/data', authenticateToken, async (req, res) => {
   }
 
   res.json({ success: true, data });
+  console.log(`Finished time user data: ${Date.now()-starttime}`);
 });
 
 router.get('/balance', authenticateToken, async (req, res) => {
@@ -43,6 +44,7 @@ router.get('/balance', authenticateToken, async (req, res) => {
 
   if (error) return res.status(400).json({ success: false, message: error.message });
   res.json({ success: true, data });
+  console.log(`Finished time user balance: ${Date.now()-starttime}`);
 });
 
 router.post('/updateuser', authenticateToken, async (req, res) => {
@@ -62,12 +64,13 @@ router.post('/updateuser', authenticateToken, async (req, res) => {
       console.error('Update user error:', error);
       return res.status(400).json({ success: false, message: error.message });
     }
-
+    console.log(`Finished time update data: ${Date.now()-starttime}`);
     return res.status(200).json({
       success: true,
       message: 'User information updated successfully',
       data,
     });
+    
   } catch (err) {
     console.error('Server error:', err);
     return res.status(500).json({ success: false, message: 'Internal server error' });
