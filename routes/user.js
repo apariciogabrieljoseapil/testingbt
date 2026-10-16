@@ -40,7 +40,7 @@ router.get('/data', authenticateToken, async (req, res) => {
 router.get('/balance', authenticateToken, async (req, res) => {
   const starttime = Date.now();
   const { data, error } = await req.supabase
-    .from('costumer_account_balance')
+    .from('customer_bp_wallets')
     .select('*')
     .single();
 
