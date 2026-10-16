@@ -4,3 +4,6 @@ MobileApp
 App.js
 node_modules
 buzztap
+detections.jsonl
+esp32.js
+uploads
